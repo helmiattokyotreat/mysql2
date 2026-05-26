@@ -96,16 +96,18 @@ jobs:
       - name: Start MySQL 5.7 container with spec-aligned flags
         run: |
           docker run -d --name mysql57 \
-            -p 3306:3306 \
+            --network=host \
             -e MYSQL_ALLOW_EMPTY_PASSWORD=yes \
             -e MYSQL_DATABASE=test \
             mysql:5.7 \
             --character-set-server=utf8 \
             --collation-server=utf8_general_ci \
-            --sql-mode="STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION" \
-            --local-infile=1 \
+            --sql-mode="STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,NO_ENGINE_SUBSTITUTION" \
+            --local-infile=0 \
             --secure-file-priv="" \
-            --max-allowed-packet=536870912
+            --max-allowed-packet=536870912 \
+            --wait-timeout=2 \
+            --interactive-timeout=2
           for i in $(seq 1 40); do
             if docker exec mysql57 mysqladmin ping -h 127.0.0.1 --silent 2>/dev/null; then
               echo "mysql is up"; break
