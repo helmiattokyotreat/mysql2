@@ -78,3 +78,32 @@ jobs:
       - if: matrix.ssl
         run: echo "rake_spec_opts=--with-openssl-dir=$(brew --prefix ${{ matrix.ssl }})" >> $GITHUB_ENV
       - run: bundle exec rake spec -- $rake_spec_opts
+
+  mysql57:
+    name: ubuntu-24.04 ruby 2.7 mysql57 (docker)
+    runs-on: ubuntu-24.04
+    services:
+      mysql:
+        image: mysql:5.7
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+          MYSQL_DATABASE: test
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=20
+    env:
+      BUNDLE_WITHOUT: development
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "2.7"
+          bundler-cache: true
+      - run: sudo echo "127.0.0.1 mysql2gem.example.com" | sudo tee -a /etc/hosts
+      - run: sudo apt-get install -y default-libmysqlclient-dev mysql-client
+      - run: echo "MAKEFLAGS=V=1" >> "$GITHUB_ENV"
+      - run: bundle exec rake spec
