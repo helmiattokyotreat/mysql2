@@ -106,4 +106,5 @@ jobs:
       - run: sudo echo "127.0.0.1 mysql2gem.example.com" | sudo tee -a /etc/hosts
       - run: sudo apt-get install -y default-libmysqlclient-dev mysql-client
       - run: echo "MAKEFLAGS=V=1" >> "$GITHUB_ENV"
+      - run: cp spec/configuration.yml.example spec/configuration.yml && sed -i 's/host: localhost/host: 127.0.0.1/g' spec/configuration.yml
       - run: bundle exec rake spec
